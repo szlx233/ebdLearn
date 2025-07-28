@@ -4,9 +4,12 @@ volatile uint8_t timer_flag = 0;
 
 void GPIO_init(void);
 void TIM_init(void);
+void delay(int);
 
 int main(void)
 {
+    GPIO_init();
+    TIM_init();
 
     while (1)
     {
@@ -22,7 +25,7 @@ int main(void)
 void GPIO_init(void)
 {
     // 初始化GPIOE时钟
-    RCC->APB4ENR |= RCC_AHB4ENR_GPIOEEN;
+    RCC->AHB4ENR |= RCC_AHB4ENR_GPIOEEN;
 
     // 设置E3
     // 输出
@@ -42,6 +45,9 @@ void TIM_init(void)
     // 设置预分频器，自动重载值
     TIM6->PSC = 64000 - 1;
     TIM6->ARR = 1000 - 1;
+
+    // 设为OPM模式
+    TIM6->CR1 = TIM_CR1_OPM;
 
     // 清除更新中断标志
     TIM6->SR &= ~TIM_SR_UIF;
