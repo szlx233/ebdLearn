@@ -54,53 +54,19 @@ defined in linker script */
  * @retval : None
 */
 
-    .section  .text.Reset_Handler
-  .weak  Reset_Handler
-  .type  Reset_Handler, %function
-Reset_Handler:
-  ldr   sp, =_estack      /* set stack pointer */
-
-/* Call the ExitRun0Mode function to configure the power supply */
+    .section  .text.Boot_Handler
+  .weak  Boot_Handler
+  .type  Boot_Handler, %function
+Boot_Handler:
+  ldr   sp, =_estack
   bl  ExitRun0Mode
-/* Call the clock system initialization function.*/
   bl  SystemInit
 
-/* Copy the data segment initializers from flash to SRAM */
-  ldr r0, =_sdata
-  ldr r1, =_edata
-  ldr r2, =_sidata
-  movs r3, #0
-  b LoopCopyDataInit
+  bl AppChoose
+loop:
+    b loop
 
-CopyDataInit:
-  ldr r4, [r2, r3]
-  str r4, [r0, r3]
-  adds r3, r3, #4
-
-LoopCopyDataInit:
-  adds r4, r0, r3
-  cmp r4, r1
-  bcc CopyDataInit
-/* Zero fill the bss segment. */
-  ldr r2, =_sbss
-  ldr r4, =_ebss
-  movs r3, #0
-  b LoopFillZerobss
-
-FillZerobss:
-  str  r3, [r2]
-  adds r2, r2, #4
-
-LoopFillZerobss:
-  cmp r2, r4
-  bcc FillZerobss
-
-/* Call static constructors */
-    bl __libc_init_array
-/* Call the application's entry point.*/
-  bl  main
-  bx  lr
-.size  Reset_Handler, .-Reset_Handler
+.size  Boot_Handler, .-Boot_Handler
 
 /**
  * @brief  This is the code that gets called when the processor receives an
@@ -127,7 +93,7 @@ Infinite_Loop:
 
 g_pfnVectors:
   .word  _estack
-  .word  Reset_Handler
+  .word  Boot_Handler
 
   .word  NMI_Handler
   .word  HardFault_Handler
