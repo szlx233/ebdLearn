@@ -25,7 +25,7 @@ void AppChoose(void)
 
     if (ispressed == 1)
     {
-        SwitchApp(0x08032000);
+        SwitchApp(0x08020000);
     }
 }
 
