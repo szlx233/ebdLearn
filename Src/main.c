@@ -3,7 +3,8 @@
 typedef void (*pAppEntry)(void);
 void SwitchApp(uint32_t appAddress);
 
-void AppChoose(void) {
+void AppChoose(void)
+{
     // 初始化时钟
     RCC->AHB4ENR |= RCC_AHB4ENR_GPIOCEN;
 
@@ -12,23 +13,24 @@ void AppChoose(void) {
 
     GPIOC->PUPDR |= (0b10 << (13 * 2));
 
-    volatile uint32_t times = 10000000;
-    volatile uint8_t ispressed = 1;
-    while (times--) {
-        if (!(GPIOC->IDR & (0b1 << 13))) {
-            ispressed = 0;
-        }
+    volatile uint8_t ispressed = 0;
+
+    if (GPIOC->IDR & (0b1 << 13))
+    {
+        ispressed = 1;
     }
 
     // 重置时钟
     RCC->AHB4ENR &= ~RCC_AHB4ENR_GPIOCEN;
 
-    if (ispressed == 1) {
+    if (ispressed == 1)
+    {
         SwitchApp(0x08032000);
     }
 }
 
-void SwitchApp(uint32_t appAddress) {
+void SwitchApp(uint32_t appAddress)
+{
     uint32_t mspValue = *(uint32_t *)appAddress;
     uint32_t resetVector = *(uint32_t *)(appAddress + 4);
 
@@ -36,7 +38,7 @@ void SwitchApp(uint32_t appAddress) {
     __disable_irq();
 
     // 设置中断向量表基地址
-    SCB->VTOR = appAddress; 
+    SCB->VTOR = appAddress;
 
     // 设置主栈指针
     __set_MSP(mspValue);
@@ -50,5 +52,6 @@ void SwitchApp(uint32_t appAddress) {
     appEntry();
 
     // 理论上不会执行到这里
-    while (1);
+    while (1)
+        ;
 }
